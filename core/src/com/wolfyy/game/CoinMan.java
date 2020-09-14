@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,11 +23,21 @@ public class CoinMan extends ApplicationAdapter
 	float gravity = 0.2f;
 	float velocity = 0;
 	int manY = 0;
+	Rectangle manRectangle;
+
 	// Coin objects
 	ArrayList<Integer> coinXs = new ArrayList<>();
 	ArrayList<Integer> coinYs = new ArrayList<>();
+	ArrayList<Rectangle> coinRectangles = new ArrayList<>();
 	Texture coin;
 	int coinCount;
+
+	// Bomb objects
+	ArrayList<Integer> bombXs = new ArrayList<>();
+	ArrayList<Integer> bombYs = new ArrayList<>();
+	ArrayList<Rectangle> bombRectangles = new ArrayList<>();
+	Texture bomb;
+	int bombCount;
 
 	Random random;
 	
@@ -43,7 +55,10 @@ public class CoinMan extends ApplicationAdapter
 		manY = Gdx.graphics.getHeight()/2;  // CENTER OF SCREEN
 
 		coin = new Texture("coin.png");
+		bomb = new Texture("bomb.png");
+
 		random = new Random();
+
 
 	}
 
@@ -52,7 +67,12 @@ public class CoinMan extends ApplicationAdapter
 		float height  = random.nextFloat() * Gdx.graphics.getHeight();
 		coinYs.add((int)height);
 		coinXs.add(Gdx.graphics.getWidth());
-
+	}
+	public void makeBomb()
+	{
+		float height  = random.nextFloat() * Gdx.graphics.getHeight();
+		bombYs.add((int)height);
+		bombXs.add(Gdx.graphics.getWidth());
 	}
 
 	@Override
@@ -62,22 +82,45 @@ public class CoinMan extends ApplicationAdapter
 		//         name       starting pos            width                      height
 		batch.draw(background, 0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
+		// Bomb after 100 unit time
+		if(bombCount < 250)
+		{
+			bombCount++;
+		}
+		else
+		{
+			bombCount = 0;
+			makeBomb();
+		}
+		bombRectangles.clear();
+		for (int i = 0; i < bombXs.size(); i++)
+		{
+			// for drawing
+			batch.draw(bomb, bombXs.get(i), bombYs.get(i));
+			bombXs.set(i, bombXs.get(i) - 8);
+			// IF TOUCHED
+			coinRectangles.add(new Rectangle(bombXs.get(i), bombYs.get(i), bomb.getWidth(), bomb.getHeight()));
+		}
 		// Coin after 100 unit time
 		if(coinCount < 100)
 		{
 			 coinCount++;
 		}
-		else {
+		else
+		{
 			coinCount = 0;
 			makeCoin();
 		}
-			for (int i = 0; i < coinXs.size(); i++) {
-				// for drawing
-				batch.draw(coin, coinXs.get(i), coinYs.get(i));
-				coinXs.set(i, coinXs.get(i) - 4);
-
-
+		coinRectangles.clear();
+		for (int i = 0; i < coinXs.size(); i++)
+		{
+			// for drawing
+			batch.draw(coin, coinXs.get(i), coinYs.get(i));
+			coinXs.set(i, coinXs.get(i) - 4);
+			// if touched
+			coinRectangles.add(new Rectangle(coinXs.get(i), coinYs.get(i), coin.getWidth(), coin.getHeight()));
 		}
+
 		// TO JUMP ON SINGLE TOUCH
 		if(Gdx.input.justTouched() == true)
 		{
@@ -103,8 +146,6 @@ public class CoinMan extends ApplicationAdapter
 			}
 		}
 
-		// drawing man at the center of the screen
-		batch.draw(man[manState],Gdx.graphics.getWidth()/2 - man[manState].getWidth()/2,manY);
 
 		// FALLING DOWN
 		velocity = velocity + gravity;
@@ -115,7 +156,24 @@ public class CoinMan extends ApplicationAdapter
 			manY = 0;
 		}
 
-
+		// drawing man at the center of the screen
+		batch.draw(man[manState],Gdx.graphics.getWidth()/2 - man[manState].getWidth()/2,manY);
+		// 	FOR COIN CILISION
+		manRectangle = new Rectangle(Gdx.graphics.getWidth()/2 - man[manState].getWidth()/2 , manY ,man[manState].getWidth(),man[manState].getHeight());
+		for (int i = 0; i < coinRectangles.size(); i++)
+		{
+			if(Intersector.overlaps(manRectangle,coinRectangles.get(i)))
+			{
+				Gdx.app.log("coin!","Collision!");
+			}
+		}
+		for (int i = 0; i < bombRectangles.size(); i++)
+		{
+			if(Intersector.overlaps(manRectangle,bombRectangles.get(i)))
+			{
+				Gdx.app.log("Bomb!","Collision!");
+			}
+		}
 		batch.end();
 	}
 	
