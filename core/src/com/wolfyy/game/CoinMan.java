@@ -2,8 +2,12 @@ package com.wolfyy.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
@@ -40,6 +44,17 @@ public class CoinMan extends ApplicationAdapter
 	int bombCount;
 
 	Random random;
+
+	int score;
+	// for score text
+	BitmapFont font;
+	int gameState = 0;
+	Texture dizzy;
+
+	Music mario;
+	Music coinSound;
+	Music bombSound;
+
 	
 	@Override
 	public void create ()// For First Time
@@ -59,6 +74,15 @@ public class CoinMan extends ApplicationAdapter
 
 		random = new Random();
 
+		font= new BitmapFont();
+		font.setColor(Color.WHITE);
+		font.getData().setScale(10);
+
+		dizzy = new Texture("dizzy-1.png");
+
+		mario = Gdx.audio.newMusic(Gdx.files.internal("mario.mp3"));
+		coinSound = Gdx.audio.newMusic(Gdx.files.internal("coin.mp3"));
+		bombSound = Gdx.audio.newMusic(Gdx.files.internal("bomb.mp3"));
 
 	}
 
@@ -82,98 +106,154 @@ public class CoinMan extends ApplicationAdapter
 		//         name       starting pos            width                      height
 		batch.draw(background, 0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
-		// Bomb after 100 unit time
-		if(bombCount < 250)
-		{
-			bombCount++;
-		}
-		else
-		{
-			bombCount = 0;
-			makeBomb();
-		}
-		bombRectangles.clear();
-		for (int i = 0; i < bombXs.size(); i++)
-		{
-			// for drawing
-			batch.draw(bomb, bombXs.get(i), bombYs.get(i));
-			bombXs.set(i, bombXs.get(i) - 8);
-			// IF TOUCHED
-			coinRectangles.add(new Rectangle(bombXs.get(i), bombYs.get(i), bomb.getWidth(), bomb.getHeight()));
-		}
-		// Coin after 100 unit time
-		if(coinCount < 100)
-		{
-			 coinCount++;
-		}
-		else
-		{
-			coinCount = 0;
-			makeCoin();
-		}
-		coinRectangles.clear();
-		for (int i = 0; i < coinXs.size(); i++)
-		{
-			// for drawing
-			batch.draw(coin, coinXs.get(i), coinYs.get(i));
-			coinXs.set(i, coinXs.get(i) - 4);
-			// if touched
-			coinRectangles.add(new Rectangle(coinXs.get(i), coinYs.get(i), coin.getWidth(), coin.getHeight()));
-		}
+		if(gameState == 1)
+		{			// CHECK IF GAME IS LIVE
 
-		// TO JUMP ON SINGLE TOUCH
-		if(Gdx.input.justTouched() == true)
-		{
-			velocity = -10;
-		}
-
-		//  TO BRING A LITTLE INTERVAL BETWEEN IMAGES (SLOW THE )
-		if(pause < 5)
-		{
-			pause++;
-		}
-		else
-		{
-			pause = 0;
-			// LOOP THROUGH DIFFERENT IMAGES IF THE MAN
-			if (manState < 3)
+			// Bomb after 100 unit time
+			mario.play();
+			if(bombCount < 220)
 			{
-				manState++;
+				bombCount++;
 			}
 			else
 			{
-				manState = 0;
+				bombCount = 0;
+				makeBomb();
+			}
+			bombRectangles.clear();
+			for (int i = 0; i < bombXs.size(); i++)
+			{
+				// for drawing
+				batch.draw(bomb, bombXs.get(i), bombYs.get(i));
+				bombXs.set(i, bombXs.get(i) - 8);
+				// IF TOUCHED
+				bombRectangles.add(new Rectangle(bombXs.get(i), bombYs.get(i), bomb.getWidth(), bomb.getHeight()));
+			}
+			// Coin after 100 unit time
+			if(coinCount < 100)
+			{
+				coinCount++;
+			}
+			else
+			{
+				coinCount = 0;
+				makeCoin();
+			}
+			coinRectangles.clear();
+			for (int i = 0; i < coinXs.size(); i++)
+			{
+				// for drawing
+				batch.draw(coin, coinXs.get(i), coinYs.get(i));
+				coinXs.set(i, coinXs.get(i) - 12);
+				// if touched
+				coinRectangles.add(new Rectangle(coinXs.get(i), coinYs.get(i), coin.getWidth(), coin.getHeight()));
+			}
+
+			// TO JUMP ON SINGLE TOUCH
+			if(Gdx.input.justTouched() == true)
+			{
+				velocity = -10;
+			}
+
+			//  TO BRING A LITTLE INTERVAL BETWEEN IMAGES (SLOW THE )
+			if(pause < 5)
+			{
+				pause++;
+			}
+			else
+			{
+				pause = 0;
+				// LOOP THROUGH DIFFERENT IMAGES IF THE MAN
+				if (manState < 3)
+				{
+					manState++;
+				}
+				else
+				{
+					manState = 0;
+				}
+			}
+
+			// FALLING DOWN
+			velocity = velocity + gravity;
+			manY -= velocity;
+			// TO PREVENT HIM FROM GETTING OF THE SCREEN
+			if(manY <= 0)
+			{
+				manY = 0;
+			}
+
+		}
+		else if (gameState == 0)
+		{// WAITING TO START
+
+			if(Gdx.input.justTouched() )
+			{
+				gameState=1;
 			}
 		}
+		else if (gameState == 2)
+		{ // GAME OVER
+			mario.stop();
+			if(Gdx.input.justTouched() )
+			{
+				gameState=1;
+				manY = Gdx.graphics.getHeight()/2;  // CENTER OF SCREEN
+				score =0;
+				velocity=0;
+				coinXs.clear();
+				coinYs.clear();
+				coinRectangles.clear();
+				coinCount = 0;
+				bombRectangles.clear();
+				bombXs.clear();
+				bombXs.clear();
+				bombCount =0;
+			}
 
-
-		// FALLING DOWN
-		velocity = velocity + gravity;
-		manY -= velocity;
-		// TO PREVENT HIM FROM GETTING OF THE SCREEN
-		if(manY <= 0)
-		{
-			manY = 0;
 		}
 
+
+		if(gameState == 2)
+		{
+			batch.draw(dizzy,Gdx.graphics.getWidth()/2 -100 - man[manState].getWidth(),manY);
+		}
+		else
+		{
+			batch.draw(man[manState],Gdx.graphics.getWidth()/2-100 - man[manState].getWidth(),manY);
+		}
 		// drawing man at the center of the screen
-		batch.draw(man[manState],Gdx.graphics.getWidth()/2 - man[manState].getWidth()/2,manY);
 		// 	FOR COIN CILISION
-		manRectangle = new Rectangle(Gdx.graphics.getWidth()/2 - man[manState].getWidth()/2 , manY ,man[manState].getWidth(),man[manState].getHeight());
+		manRectangle = new Rectangle(Gdx.graphics.getWidth()/2 -100- man[manState].getWidth() , manY ,man[manState].getWidth(),man[manState].getHeight());
 		for (int i = 0; i < coinRectangles.size(); i++)
 		{
 			if(Intersector.overlaps(manRectangle,coinRectangles.get(i)))
 			{
+				coinSound.play();
 				Gdx.app.log("coin!","Collision!");
+				score++;
+				// GET RID OF COIN
+				coinRectangles.remove(i);
+				coinXs.remove(i);
+				coinYs.remove(i);
+				break;
 			}
 		}
+
+		// 	FOR BOMB CILISION
 		for (int i = 0; i < bombRectangles.size(); i++)
 		{
 			if(Intersector.overlaps(manRectangle,bombRectangles.get(i)))
 			{
+				bombSound.play();
 				Gdx.app.log("Bomb!","Collision!");
+				// game over
+				gameState =2;
+
 			}
 		}
+		// SHOWING SCORE
+		font.draw(batch, String.valueOf(score),100,2100);
 		batch.end();
 	}
 	
