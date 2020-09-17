@@ -9,9 +9,7 @@ You can view your coins count on the top left corner.And your highest collection
 You have to tap on the screen to jump.You can tap as many times as you want it all adds up to his jump.
 While falling he first falls slowly and then faster, to make it look like real gravity=)
 
-<img src="https://github.com/wolfy222/Coin-Man-Game/blob/master/Screenshots/Screenshot_20200917-182538_Coin%20Man.jpg " alt="drawing" width="190"/>
-<img src="https://github.com/wolfy222/Coin-Man-Game/blob/master/Screenshots/Screenshot_20200917-182602_Coin%20Man.jpg " alt="drawing" width="190"/>
-<img src="https://github.com/wolfy222/Coin-Man-Game/blob/master/Screenshots/Screenshot_20200917-182621_Coin%20Man.jpg " alt="drawing" width="190"/>
+<img src="https://github.com/wolfy222/Coin-Man-Game/blob/master/Screenshots/Screenshot_20200917-182538_Coin%20Man.jpg " alt="drawing" width="190"/>  <img src="https://github.com/wolfy222/Coin-Man-Game/blob/master/Screenshots/Screenshot_20200917-182602_Coin%20Man.jpg " alt="drawing" width="190"/>  <img src="https://github.com/wolfy222/Coin-Man-Game/blob/master/Screenshots/Screenshot_20200917-182621_Coin%20Man.jpg " alt="drawing" width="190"/>
 
 
 
