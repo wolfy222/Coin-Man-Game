@@ -24,7 +24,7 @@ public class CoinMan extends ApplicationAdapter
 	Texture[] man;
 	int manState;
 	int pause = 0;
-	float gravity = 0.2f;
+	float gravity = 0.25f;
 	float velocity = 0;
 	int manY = 0;
 	Rectangle manRectangle;
@@ -55,6 +55,9 @@ public class CoinMan extends ApplicationAdapter
 	Music coinSound;
 	Music bombSound;
 
+	int highestScore;
+	BitmapFont highFont;
+
 	
 	@Override
 	public void create ()// For First Time
@@ -84,6 +87,12 @@ public class CoinMan extends ApplicationAdapter
 		coinSound = Gdx.audio.newMusic(Gdx.files.internal("coin.mp3"));
 		bombSound = Gdx.audio.newMusic(Gdx.files.internal("bomb.mp3"));
 
+		highFont= new BitmapFont();
+		highFont.setColor(Color.RED);
+		highFont.getData().setScale(7);
+
+
+
 	}
 
 	public void makeCoin()
@@ -111,7 +120,7 @@ public class CoinMan extends ApplicationAdapter
 
 			// Bomb after 100 unit time
 			mario.play();
-			if(bombCount < 220)
+			if(bombCount < 250)
 			{
 				bombCount++;
 			}
@@ -144,7 +153,7 @@ public class CoinMan extends ApplicationAdapter
 			{
 				// for drawing
 				batch.draw(coin, coinXs.get(i), coinYs.get(i));
-				coinXs.set(i, coinXs.get(i) - 12);
+				coinXs.set(i, coinXs.get(i) - 13);
 				// if touched
 				coinRectangles.add(new Rectangle(coinXs.get(i), coinYs.get(i), coin.getWidth(), coin.getHeight()));
 			}
@@ -156,7 +165,7 @@ public class CoinMan extends ApplicationAdapter
 			}
 
 			//  TO BRING A LITTLE INTERVAL BETWEEN IMAGES (SLOW THE )
-			if(pause < 5)
+			if(pause < 4)
 			{
 				pause++;
 			}
@@ -231,7 +240,12 @@ public class CoinMan extends ApplicationAdapter
 			{
 				coinSound.play();
 				Gdx.app.log("coin!","Collision!");
+
 				score++;
+				if (highestScore<score)
+				{
+					highestScore = score;
+				}
 				// GET RID OF COIN
 				coinRectangles.remove(i);
 				coinXs.remove(i);
@@ -253,7 +267,8 @@ public class CoinMan extends ApplicationAdapter
 			}
 		}
 		// SHOWING SCORE
-		font.draw(batch, String.valueOf(score),100,2100);
+		font.draw(batch, String.valueOf(score),Gdx.graphics.getWidth() - 1000,Gdx.graphics.getHeight()-100);
+		highFont.draw(batch, String.valueOf(highestScore),Gdx.graphics.getWidth() - 150,Gdx.graphics.getHeight()-100);
 		batch.end();
 	}
 	
